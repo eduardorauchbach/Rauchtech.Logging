@@ -22,21 +22,21 @@ Log implementation class to facilitate the logging of complex workflows
 <br/>
 
 **AddKey**: Used to add key information in the logs. The Behavior can vary following the sequence or the hole scope.
-- **$${\color{cyan}string}$$ key** $${\color{orange}(required)}$$: Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
-- **$${\color{cyan}object}$$ value** $${\color{orange}(required)}$$: Value of the key, can be any object.
+- **<span style="color:cyan">string</span> key** <span style="color:orange">(required)</span>: Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
+- **<span style="color:cyan">object</span> value** <span style="color:orange">(required)</span>: Value of the key, can be any object.
 </br>
 
 **LogCustom**: Used to add a new Log register.
 
-- **$${\color{cyan}LogLevel}$$ logLevel** $${\color{orange}(required)}$$ - Severity of the log (Microsoft.Extensions.Logging)
-- **$${\color{cyan}LogType?}$$ logType = LogType.Log** - used to define between "Log" and "Dashboard" information
-- **$${\color{cyan}EventId?}$$ eventId = null** - EventId in case it's being used (Microsoft.Extensions.Logging.EventId)
-- **$${\color{cyan}Exception}$$ exception = null** - Exception
-- **$${\color{cyan}string}$$ message = null** - Simple message
-- **$${\color{gray}string? sourceContext = null}$$** - Do not send
-- **$${\color{gray}[CallerMemberName] string memberName = null}$$** - Do not send
-- **$${\color{gray}[CallerLineNumber] int sourceLineNumber = 0}$$**  - Do not send
-- **$${\color{cyan}params ValueTuple<string, object>[]}$$ args** - Tupple array (Name, Objet), the objects will be **serialized using Json**
+- **<span style="color:cyan">LogLevel</span> logLevel** <span style="color:orange">(required)</span> - Severity of the log (Microsoft.Extensions.Logging)
+- **<span style="color:cyan">LogType?</span> logType = LogType.Log** - used to define between "Log" and "Dashboard" information
+- **<span style="color:cyan">EventId?</span> eventId = null** - EventId in case it's being used (Microsoft.Extensions.Logging.EventId)
+- **<span style="color:cyan">Exception</span> exception = null** - Exception
+- **<span style="color:cyan">string</span> message = null** - Simple message
+- **<span style="color:gray">string? sourceContext = null</span>** - Do not send
+- **<span style="color:gray">[CallerMemberName] string memberName = null</span>** - Do not send
+- **<span style="color:gray">[CallerLineNumber] int sourceLineNumber = 0</span>**  - Do not send
+- **<span style="color:cyan">params ValueTuple<string, object>[]</span> args** - Tupple array (Name, Objet), the objects will be **serialized using Json**
 ``` csharp
     new (string, object)[]
     {
@@ -48,8 +48,8 @@ Log implementation class to facilitate the logging of complex workflows
 
 ## **Configuration**:
 
-- **ApplicationName** $${\color{orange}(required)}$$$${\color{cyan}(string)}$$: string Sets the ApplicationName property at the Log custom column
-- **LogLevel** $${\color{orange}(required)}$$$${\color{cyan}(string)}$$: Severity of the log (Microsoft.Extensions.Logging), determine the lower level accepted and ignores all the others.
+- **ApplicationName** <span style="color:orange">(required)</span><span style="color:cyan">(string)</span>: string Sets the ApplicationName property at the Log custom column
+- **LogLevel** <span style="color:orange">(required)</span><span style="color:cyan">(string)</span>: Severity of the log (Microsoft.Extensions.Logging), determine the lower level accepted and ignores all the others.
 ``` csharp
         //
         // Summary:
@@ -90,7 +90,7 @@ Log implementation class to facilitate the logging of complex workflows
         //     write any messages.
         None
 ```
-- **EnableScopeKeys** $${\color{cyan}(bool)}$$: Sets if the Keys will be used from the usage onwards or if they will be set for the entire scope.
+- **EnableScopeKeys** <span style="color:cyan">(bool)</span>: Sets if the Keys will be used from the usage onwards or if they will be set for the entire scope.
 
     - **Warning** : If this property is set to true, the logs will only be fired after calling "Finish()", and it's advised to put this at the finish clause of trye/cath in the Function call.
 
