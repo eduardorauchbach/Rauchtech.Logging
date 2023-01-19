@@ -1,4 +1,4 @@
-﻿# **CustomLogs**
+# **CustomLogs**
 Log library to facilitate the logging of complex workflows in Azure
 
 ## **Startup**
