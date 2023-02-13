@@ -21,7 +21,7 @@ Log implementation class to facilitate the logging of complex workflows
 ## **Default Use Events**
 
 **AddKey**: Used to add key information in the logs. The Behavior can vary following the sequence or the hole scope.
-- **$\color{cyan}{string}$ key** <font color=orange>(required)</font>: Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
+- **<code style="color : cyan">string</code> key** <font color=orange>(required)</font>: Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
 - **<font color=cyan>object</font> value** <font color=orange>(required)</font>: Value of the key, can be any object.
 </br>
 
