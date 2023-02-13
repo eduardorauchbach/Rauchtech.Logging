@@ -32,7 +32,7 @@ Log implementation class to facilitate the logging of complex workflows
 - **$\color{cyan}{EventId?}$ eventId = null** - EventId in case it's being used (Microsoft.Extensions.Logging.EventId)
 - **$\color{cyan}{Exception}$ exception = null** - Exception
 - **$\color{cyan}{string}$ message = null** - Simple message
-- **$\color{gray}{string? sourceContext = null}$** - Do not send
+- **$\color{gray}{string?&nbsp;sourceContext = null}$** - Do not send
 - **$\color{gray}{[CallerMemberName] string memberName = null}$** - Do not send
 - **$\color{gray}{[CallerLineNumber] int sourceLineNumber = 0}$**  - Do not send
 - **$\color{cyan}{params ValueTuple<string, object>[]}$ args** - Tupple array (Name, Objet), the objects will be **serialized using Json**
