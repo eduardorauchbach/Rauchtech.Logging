@@ -35,7 +35,7 @@ Log implementation class to facilitate the logging of complex workflows
 - **$\color{gray}{string? sourceContext = null}$** - Do not send
 - **$\color{gray}{[CallerMemberName]}$ $\color{gray}{string}$ $\color{gray}{memberName = null}$** - Do not send
 - **$\color{gray}{[CallerLineNumber]}$ $\color{gray}{int}$ $\color{gray}{sourceLineNumber = 0}$**  - Do not send
-- **$\color{cyan}{params}$ $\color{cyan}{ValueTuple\<string, object\>[]}$ args** - Tupple array (Name, Objet), the objects will be **serialized using Json**
+- **$\color{cyan}{params}$ $\color{cyan}{ValueTuple<<string, object>>[]}$ args** - Tupple array (Name, Objet), the objects will be **serialized using Json**
 ``` csharp
     new (string, object)[]
     {
