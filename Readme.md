@@ -1,7 +1,7 @@
 # **CustomLogs**
 Log implementation class to facilitate the logging of complex workflows
 
-# **Requirements**
+## **Requirements**
 **$\color{orange}{MethodBoundaryAspect.Fody}$** (need to be placed in any project that uses the **$\color{orange}{LogAspect}$**, otherwise the code injection will not work and the log will not fire)
 
 ## **Startup**
