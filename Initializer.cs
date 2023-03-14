@@ -1,4 +1,5 @@
-﻿using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
@@ -20,6 +21,10 @@ namespace Rauchtech.Logging
 
         private static IServiceCollection ConfigureSerilog(this IServiceCollection services)
         {
+            var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            var telemetryInitializer = new UserIdTelemetryInitializer(Environment.GetEnvironmentVariable("ApplicationName") ?? "Anonymous");
+            telemetryConfiguration.TelemetryInitializers.Add(telemetryInitializer);
+
             Log.Logger = new LoggerConfiguration()
                          .MinimumLevel.Verbose()
                          .MinimumLevel.Override("Host.Startup", LogEventLevel.Warning)
@@ -32,12 +37,33 @@ namespace Rauchtech.Logging
                          .MinimumLevel.Override("System", LogEventLevel.Warning)
                          .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
                          .Enrich.WithExceptionDetails()
+                         .Enrich.FromLogContext()
                          .WriteTo.ApplicationInsights(
-                             TelemetryConfiguration.CreateDefault(),
+                             telemetryConfiguration,
                              TelemetryConverter.Events,
                              LogEventLevel.Verbose)
                          .CreateLogger();
+
             return services.AddLogging(configure => configure.AddSerilog(Log.Logger));
+        }
+
+        #endregion
+
+        #region Telemetry Helper
+
+        private class UserIdTelemetryInitializer : ITelemetryInitializer
+        {
+            private readonly string _userId;
+
+            public UserIdTelemetryInitializer(string userId)
+            {
+                _userId = userId;
+            }
+
+            public void Initialize(ITelemetry telemetry)
+            {
+                telemetry.Context.User.Id = _userId;
+            }
         }
 
         #endregion
