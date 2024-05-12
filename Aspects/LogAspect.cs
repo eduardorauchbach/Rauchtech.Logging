@@ -1,9 +1,9 @@
-﻿using Rauchtech.Logging.Services.Code;
+﻿using RauchTech.Logging.Services;
 using MethodBoundaryAspect.Fody.Attributes;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 
-namespace Rauchtech.Logging
+namespace RauchTech.Logging.Aspects
 {
     [Serializable]
     [AttributeUsage(AttributeTargets.Method)]
@@ -13,7 +13,7 @@ namespace Rauchtech.Logging
 
         public override void OnEntry(MethodExecutionArgs arg)
         {
-            GetLogger(arg)?.LogCustom(LogLevel.Debug, LogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogMessages.Begin);
+            GetLogger(arg)?.Log(LogLevel.Debug, CustomLogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogDefaultMessages.Begin);
         }
 
 
@@ -23,24 +23,24 @@ namespace Rauchtech.Logging
             {
                 t.ContinueWith(_ =>
                 {
-                    GetLogger(arg)?.LogCustom(LogLevel.Debug, LogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogMessages.Finish);
+                    GetLogger(arg)?.Log(LogLevel.Debug, CustomLogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogDefaultMessages.Finish);
                 }, TaskContinuationOptions.ExecuteSynchronously);
             }
             else
             {
-                GetLogger(arg)?.LogCustom(LogLevel.Debug, LogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogMessages.Finish);
+                GetLogger(arg)?.Log(LogLevel.Debug, CustomLogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, message: CustomLogDefaultMessages.Finish);
             }
         }
 
         public override void OnException(MethodExecutionArgs arg)
         {
-            GetLogger(arg)?.LogCustom(LogLevel.Error, LogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, exception: arg.Exception);
+            GetLogger(arg)?.Log(LogLevel.Error, CustomLogType.Log, sourceContext: arg.Instance.GetType().FullName, memberName: arg.Method.Name, sourceLineNumber: 0, exception: arg.Exception);
         }
 
         private CustomLog? GetLogger(MethodExecutionArgs arg)
         {
             var type = arg.Instance.GetType();
-            if (_logger == null)
+            if (_logger is null)
             {
                 var members = type?.FindMembers(MemberTypes.Field, BindingFlags.Instance | BindingFlags.NonPublic, (x, y) => ((FieldInfo)x).FieldType.Name.StartsWith("ICustomLog"), null);
                 if (members?.Length > 0)

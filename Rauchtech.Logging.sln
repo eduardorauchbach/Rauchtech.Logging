@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.3.32929.385
+VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rauchtech.Logging", "Rauchtech.Logging.csproj", "{9F6EB7E1-9B7F-4097-AA12-3BF228EC7467}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RauchTech.Logging", "RauchTech.Logging.csproj", "{52420607-3F22-4430-A8DF-CAB2B35009EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9F6EB7E1-9B7F-4097-AA12-3BF228EC7467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F6EB7E1-9B7F-4097-AA12-3BF228EC7467}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F6EB7E1-9B7F-4097-AA12-3BF228EC7467}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F6EB7E1-9B7F-4097-AA12-3BF228EC7467}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52420607-3F22-4430-A8DF-CAB2B35009EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52420607-3F22-4430-A8DF-CAB2B35009EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52420607-3F22-4430-A8DF-CAB2B35009EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52420607-3F22-4430-A8DF-CAB2B35009EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {35529B52-4410-4FFE-9B1F-AB15CD0286AB}
+		SolutionGuid = {88677EC9-F8A8-4D5F-95A8-3F6FDD22FD54}
 	EndGlobalSection
 EndGlobal

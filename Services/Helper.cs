@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 
-namespace Rauchtech.Logging.Services.Code
+namespace RauchTech.Logging.Services
 {
     internal static class Helper
     {
@@ -15,7 +15,7 @@ namespace Rauchtech.Logging.Services.Code
             }
 
             StringBuilder builder = new StringBuilder(text.Length + Math.Min(2, text.Length / 5));
-            UnicodeCategory? previousCategory = default(UnicodeCategory?);
+            UnicodeCategory? previousCategory = default;
 
             for (int currentIndex = 0; currentIndex < text.Length; currentIndex++)
             {
@@ -69,16 +69,16 @@ namespace Rauchtech.Logging.Services.Code
             return builder.ToString();
         }
 
-        public static string NameOfCallingClass()
+        public static string NameOfCallingClass(bool fromExtension = false)
         {
             string fullName;
             Type declaringType;
-            int skipFrames = 2;
+            int skipFrames = fromExtension ? 4 : 2;
             do
             {
                 MethodBase method = new StackFrame(skipFrames, false).GetMethod();
                 declaringType = method.DeclaringType;
-                if (declaringType == null)
+                if (declaringType is null)
                 {
                     return method.Name;
                 }
@@ -89,6 +89,34 @@ namespace Rauchtech.Logging.Services.Code
             fullName = declaringType.ReflectedType?.FullName ?? declaringType.FullName;
 
             return fullName;
+        }
+
+        public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj)
+        {
+            if (obj is null)
+                yield break;
+
+            Type type = obj.GetType();
+            // Directly return the value if it's a simple type or a specific case
+            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
+            {
+                if (key.EndsWith("Id") || key == "id")
+                    yield return (key, obj);
+            }
+            else
+            {
+                // Iterate through all properties of the object
+                foreach (PropertyInfo propInfo in type.GetProperties())
+                {
+                    string propName = propInfo.Name;
+                    object propValue = propInfo.GetValue(obj, null);
+
+                    if (propName == "Id" || propName.EndsWith("Id"))
+                    {
+                        yield return ($"{key}.{propName}", propValue);
+                    }
+                }
+            }
         }
     }
 }
