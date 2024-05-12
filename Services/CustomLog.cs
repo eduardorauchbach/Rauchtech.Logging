@@ -30,7 +30,7 @@ namespace RauchTech.Logging.Services
         {
             if (MinimumLogLevel <= LogLevel.Debug)
             {
-                var args = context.ActionArguments.Select(arg => ($"{arg.Key}", arg.Value)).ToArray();
+                var args = context.ActionArguments.SelectMany(arg => Helper.RemoveBannedParameters(arg.Key, arg.Value, BannedParameters)).ToArray();
                 foreach (var arg in args.SelectMany(arg => Helper.GetIdProperties(arg.Item1, arg.Value)).Distinct())
                 {
                     AddKey($"param {arg.Key}", arg.Value);
@@ -170,6 +170,7 @@ namespace RauchTech.Logging.Services
         public static LogLevel MinimumLogLevel { get; set; }
         public static string ApplicationName { get; set; } = string.Empty;
         public static bool EnableScopeKeys { get; set; } = false;
+        public static string[] BannedParameters { get; set; } = [];
 
         public CustomLogVault IDs { get; set; }
         public CustomLogHistory LogHistory { get; set; }
@@ -190,6 +191,8 @@ namespace RauchTech.Logging.Services
 
             ApplicationName = configuration["ApplicationName"] ?? "unknown";
             EnableScopeKeys = Convert.ToBoolean(configuration["EnableScopeKeys"] ?? "false");
+            BannedParameters = (configuration["LogFiltersBannedParameters"] ?? "").Split(';');
+
             ILoggerFactory = loggerFactory;
             IDs = new CustomLogVault();
             LogHistory = new CustomLogHistory();

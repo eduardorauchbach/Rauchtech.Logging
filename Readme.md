@@ -98,8 +98,7 @@ builder.Services.AddControllersWithViews(options =>
 
 >[!WARNING]]
 >
->Disable the Debug for Production, because this version will take password information (sorry, just noticed)
-
+>Configurate the LogFiltersBannedParameters settings, so the Passwords and other sensitive informations are not logged.
 
 ## **Configuration**:
 
@@ -160,6 +159,9 @@ builder.Services.AddControllersWithViews(options =>
         _logger.Finish();
     }
     ```
+- **LogFiltersBannedParameters**: Will exclude any parameter from the Filters parameters logging, can be used several parameters
+    - Ex: "Password;Senha;PalavraChave"
+
 
 >**NOTE**
 >
