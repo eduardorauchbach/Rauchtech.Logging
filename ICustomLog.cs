@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 
-namespace Rauchtech.Logging
+namespace RauchTech.Logging
 {
     public interface ICustomLog<T> : ICustomLogFactory where T : class
     {
@@ -18,12 +18,13 @@ namespace Rauchtech.Logging
         /// <param name="logLevel"></param>
         /// <param name="eventId"></param>
         /// <param name="exception"></param>
+        /// <param name="sourceContext">Any text, does not accept column based logging</param>
         /// <param name="message">Any text, does not accept column based logging</param>
         /// <param name="memberName"></param>
         /// <param name="sourceLineNumber"></param>
         /// <param name="args">Any object that converted to json and combined with message stays under the string size limit (36k...)</param>
-        public void LogCustom(LogLevel logLevel,
-                                LogType logType = LogType.Log,
+        public void Log(LogLevel logLevel,
+                                CustomLogType logType = CustomLogType.Log,
                                 EventId? eventId = null,
                                 Exception? exception = null,
                                 string? message = null,
