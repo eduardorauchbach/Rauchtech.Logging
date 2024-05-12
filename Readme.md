@@ -1,13 +1,13 @@
 # **CustomLogs**
 Log implementation class to facilitate the logging of complex workflows
 
-</br>
+
 
 ## **Requirements**
 
 **MethodBoundaryAspect.Fody** need to be placed in any main project that uses the **LogAspect**, otherwise the code injection will not work and the log will not work.
 
-</br>
+
 
 ## **Startup**
 
@@ -30,14 +30,14 @@ Log implementation class to facilitate the logging of complex workflows
     }
     ```
 
-</br>
+
 
 ## **Default Use Events**
 
 **AddKey**: Used to add key information in the logs. The Behavior can vary following the sequence or the hole scope.
 - **string key** (required) : Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
 - **object value** (required) : Value of the key, can be any object.
-</br></br>
+
 
 **Log**: Used to add a new Log register.
 
@@ -67,7 +67,7 @@ Log implementation class to facilitate the logging of complex workflows
 >- LogWarning
 >- LogError
 
-</br>
+
 
 ## LogAspect
 
@@ -80,7 +80,7 @@ public void DemoMethod()
 }
 ```
 
-</br>
+
 
 ## Filters
 
@@ -96,7 +96,10 @@ builder.Services.AddControllersWithViews(options =>
 });
 ```   
 
-</br>
+>[!WARNING]]
+>
+>Disable the Debug for Production, because this version will take password information (sorry, just noticed)
+
 
 ## **Configuration**:
 
@@ -162,7 +165,7 @@ builder.Services.AddControllersWithViews(options =>
 >
 >Use the AddKey method before any other Log in case the "EnableScopeKeys" is not true.
 
-</br>
+
 
 ## **Custom Visualizations**
 
