@@ -118,5 +118,35 @@ namespace RauchTech.Logging.Services
                 }
             }
         }
+
+        public static IEnumerable<(string Key, object Value)> RemoveBannedParameters(string key, object obj, string[] bannedParameters)
+        {
+            if (obj is null)
+                yield break;
+
+            Type type = obj.GetType();
+            // Directly return the value if it's a simple type or a specific case
+            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
+            {
+                if (!bannedParameters.Contains(key))
+                {
+                    yield return (key, obj);
+                }
+            }
+            else
+            {
+                // Iterate through all properties of the object
+                foreach (PropertyInfo propInfo in type.GetProperties())
+                {
+                    string propName = propInfo.Name;
+                    object propValue = propInfo.GetValue(obj, null);
+
+                    if (!bannedParameters.Contains(propName))
+                    {
+                        yield return ($"{key}.{propName}", propValue);
+                    }
+                }
+            }
+        }
     }
 }
