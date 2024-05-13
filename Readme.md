@@ -37,7 +37,9 @@ Log implementation class to facilitate the logging of complex workflows
 **AddKey**: Used to add key information in the logs. The Behavior can vary following the sequence or the hole scope.
 - **string key** (required) : Name of the key, it will be normalized using "Snake Case". Ex: **AsTest => as_test**
 - **object value** (required) : Value of the key, can be any object.
-
+>**NOTE**
+>
+>Use the AddKey method before any other Log in case the "EnableScopeKeys" is not true.
 
 **Log**: Used to add a new Log register.
 
@@ -161,12 +163,6 @@ builder.Services.AddControllersWithViews(options =>
     ```
 - **LogFiltersBannedParameters**: Will exclude any parameter from the Filters parameters logging, can be used several parameters
     - Ex: "Password;Senha;PalavraChave"
-
-
->**NOTE**
->
->Use the AddKey method before any other Log in case the "EnableScopeKeys" is not true.
-
 
 
 ## **Custom Visualizations**
