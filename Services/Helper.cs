@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -91,7 +94,7 @@ namespace RauchTech.Logging.Services
             return fullName;
         }
 
-        public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj)
+        public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj, string[] keyParameters)
         {
             if (obj is null)
                 yield break;
@@ -100,8 +103,21 @@ namespace RauchTech.Logging.Services
             // Directly return the value if it's a simple type or a specific case
             if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
             {
-                if (key.EndsWith("Id") || key == "id")
+                if (keyParameters.Contains(key))
                     yield return (key, obj);
+            }
+            else if (obj is IEnumerable)
+            {
+                var current = obj as IEnumerable<object>;
+                var index = 0;
+                foreach (var item in current!)
+                {
+                    foreach (var prop in GetIdProperties($"{key}[{index}]", item, keyParameters))
+                    {
+                        yield return prop;
+                    }
+                    index++;
+                }
             }
             else
             {
@@ -109,17 +125,17 @@ namespace RauchTech.Logging.Services
                 foreach (PropertyInfo propInfo in type.GetProperties())
                 {
                     string propName = propInfo.Name;
-                    object propValue = propInfo.GetValue(obj, null);
+                    object propValue = propInfo.GetValue(obj, null)!;
 
-                    if (propName == "Id" || propName.EndsWith("Id"))
+                    foreach (var prop in GetIdProperties($"{key}.{propName}", propValue, keyParameters))
                     {
-                        yield return ($"{key}.{propName}", propValue);
+                        yield return prop;
                     }
                 }
             }
         }
 
-        public static IEnumerable<(string Key, object Value)> RemoveBannedParameters(string key, object obj, string[] bannedParameters)
+        public static IEnumerable<(string Key, object Value)> GetAllowedParameters(string key, object obj, string[] bannedParameters)
         {
             if (obj is null)
                 yield break;
@@ -135,18 +151,45 @@ namespace RauchTech.Logging.Services
             }
             else
             {
-                // Iterate through all properties of the object
-                foreach (PropertyInfo propInfo in type.GetProperties())
-                {
-                    string propName = propInfo.Name;
-                    object propValue = propInfo.GetValue(obj, null);
+                var result = new Dictionary<string, object>();
 
-                    if (!bannedParameters.Contains(propName))
+                if (obj is IEnumerable)
+                {
+                    var current = obj as IEnumerable;
+                    var index = 0;
+                    foreach (var item in current!)
                     {
-                        yield return ($"{key}.{propName}", propValue);
+                        foreach (var prop in GetAllowedParameters(item.GetType().Name, item, bannedParameters))
+                        {
+                            result.Add($"[{index}]", prop.Value);
+                        }
+                        index++;
                     }
+
+                    yield return (key, ToDynamic(result));
+                }
+                else
+                {
+                    // Iterate through all properties of the object
+                    foreach (PropertyInfo propInfo in type.GetProperties())
+                    {
+                        string propName = propInfo.Name;
+                        object propValue = propInfo.GetValue(obj, null)!;
+
+                        foreach (var prop in GetAllowedParameters(propName, propValue, bannedParameters))
+                        {
+                            result.Add(propName, prop.Value);
+                        }
+                    }
+
+                    yield return (key, ToDynamic(result));
                 }
             }
+        }
+
+        private static dynamic ToDynamic(Dictionary<string, object> props)
+        {
+            return props.Aggregate(new ExpandoObject() as IDictionary<string, Object>, (a, p) => { a.Add(p); return a; });
         }
     }
 }
