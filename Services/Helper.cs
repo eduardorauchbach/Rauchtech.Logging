@@ -1,7 +1,12 @@
-﻿using System.Diagnostics;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RauchTech.Logging.Services
 {
@@ -76,8 +81,8 @@ namespace RauchTech.Logging.Services
             int skipFrames = fromExtension ? 4 : 2;
             do
             {
-                MethodBase method = new StackFrame(skipFrames, false).GetMethod();
-                declaringType = method.DeclaringType;
+                MethodBase method = new StackFrame(skipFrames, false).GetMethod()!;
+                declaringType = method.DeclaringType!;
                 if (declaringType is null)
                 {
                     return method.Name;
@@ -86,67 +91,49 @@ namespace RauchTech.Logging.Services
             }
             while (declaringType.Module.Name.Equals("mscorlib.dll", StringComparison.OrdinalIgnoreCase));
 
-            fullName = declaringType.ReflectedType?.FullName ?? declaringType.FullName;
+            fullName = declaringType.ReflectedType?.FullName ?? declaringType.FullName!;
 
             return fullName;
         }
 
-        public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj)
+        public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj, string[] keyParameters)
         {
-            if (obj is null)
-                yield break;
+            var json = JsonConvert.SerializeObject(obj);
 
-            Type type = obj.GetType();
-            // Directly return the value if it's a simple type or a specific case
-            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
+            var regex = new Regex(@"""(\w+)"":\s*(?:""([^""]*)""|(\d+))", RegexOptions.Compiled);
+            var matches = regex.Matches(json);
+
+            foreach (Match match in matches)
             {
-                if (key.EndsWith("Id") || key == "id")
-                    yield return (key, obj);
-            }
-            else
-            {
-                // Iterate through all properties of the object
-                foreach (PropertyInfo propInfo in type.GetProperties())
+                var outputKey = $"{key}.{match.Groups[1].Value}";
+                var value = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[3].Value;
+
+                if (keyParameters.Any(x => outputKey.EndsWith(x)))
                 {
-                    string propName = propInfo.Name;
-                    object propValue = propInfo.GetValue(obj, null);
-
-                    if (propName == "Id" || propName.EndsWith("Id"))
-                    {
-                        yield return ($"{key}.{propName}", propValue);
-                    }
+                    yield return (outputKey, value);
                 }
             }
         }
 
-        public static IEnumerable<(string Key, object Value)> RemoveBannedParameters(string key, object obj, string[] bannedParameters)
+        public static (string Key, object? Value) RemoveBannedProperties(string key, object obj, string[] bannedParameters)
         {
-            if (obj is null)
-                yield break;
+            if (obj is null) return (key, default);
 
-            Type type = obj.GetType();
-            // Directly return the value if it's a simple type or a specific case
-            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
-            {
-                if (!bannedParameters.Contains(key))
-                {
-                    yield return (key, obj);
-                }
-            }
-            else
-            {
-                // Iterate through all properties of the object
-                foreach (PropertyInfo propInfo in type.GetProperties())
-                {
-                    string propName = propInfo.Name;
-                    object propValue = propInfo.GetValue(obj, null);
+            var json = JsonConvert.SerializeObject(obj);
 
-                    if (!bannedParameters.Contains(propName))
-                    {
-                        yield return ($"{key}.{propName}", propValue);
-                    }
-                }
+            foreach (var bannedParam in bannedParameters)
+            {
+                var regex = new Regex($@"""{bannedParam}"":\s*(?:""[^""]*""|\d+|null|true|false|\[[^\]]*\]|\{{[^\}}]*\}})\s*,?", RegexOptions.Compiled);
+                json = regex.Replace(json, string.Empty);
             }
+
+            json = json.Trim().TrimEnd(',');
+
+            // Clean up any trailing commas
+            json = Regex.Replace(json, @",\s*}", "}");
+            json = Regex.Replace(json, @",\s*]", "]");
+
+            return (key, JsonConvert.DeserializeObject(json, obj.GetType()));
         }
     }
 }

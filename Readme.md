@@ -100,6 +100,7 @@ builder.Services.AddControllersWithViews(options =>
 
 >[!WARNING]]
 >
+>Configurate the LogFiltersKeyParameters settings, so the Ids and other key informations can be automatically used as Keys in the logs.
 >Configurate the LogFiltersBannedParameters settings, so the Passwords and other sensitive informations are not logged.
 
 ## **Configuration**:
@@ -161,6 +162,8 @@ builder.Services.AddControllersWithViews(options =>
         _logger.Finish();
     }
     ```
+- **LogFiltersKeyParameters**: Will select as an id, any parameter from the Filters parameters logging, can be used several parameters
+    - Ex: "ID;Id;Identification"
 - **LogFiltersBannedParameters**: Will exclude any parameter from the Filters parameters logging, can be used several parameters
     - Ex: "Password;Senha;PalavraChave"
 

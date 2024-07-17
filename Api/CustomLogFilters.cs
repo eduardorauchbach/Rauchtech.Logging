@@ -10,8 +10,8 @@ namespace RauchTech.Logging.Api
     {
         private readonly CustomLog<CustomLogFilter> _log;
 
-        private string _sourceContext;
-        private string _actionName;
+        private string? _sourceContext;
+        private string? _actionName;
 
         public CustomLogFilter(ICustomLog<CustomLogFilter> log)
         {
@@ -20,7 +20,7 @@ namespace RauchTech.Logging.Api
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _sourceContext = context.Controller.GetType().FullName;
+            _sourceContext = context.Controller.GetType().FullName!;
             _actionName = ((ControllerActionDescriptor)context.ActionDescriptor).ActionName;
 
             // Before the action executes
@@ -41,7 +41,7 @@ namespace RauchTech.Logging.Api
 
         private void LogEntry(ActionExecutingContext context)
         {
-            _log.RegisterContextParameters(context, _sourceContext, _actionName);
+            _log.RegisterContextParameters(context, _sourceContext!, _actionName!);
             _log.Log(LogLevel.Information, sourceContext: _sourceContext, memberName: _actionName, message: CustomLogDefaultMessages.Begin);
         }
 
