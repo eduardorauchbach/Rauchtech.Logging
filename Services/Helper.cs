@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RauchTech.Logging.Services
 {
@@ -79,8 +81,8 @@ namespace RauchTech.Logging.Services
             int skipFrames = fromExtension ? 4 : 2;
             do
             {
-                MethodBase method = new StackFrame(skipFrames, false).GetMethod();
-                declaringType = method.DeclaringType;
+                MethodBase method = new StackFrame(skipFrames, false).GetMethod()!;
+                declaringType = method.DeclaringType!;
                 if (declaringType is null)
                 {
                     return method.Name;
@@ -89,107 +91,49 @@ namespace RauchTech.Logging.Services
             }
             while (declaringType.Module.Name.Equals("mscorlib.dll", StringComparison.OrdinalIgnoreCase));
 
-            fullName = declaringType.ReflectedType?.FullName ?? declaringType.FullName;
+            fullName = declaringType.ReflectedType?.FullName ?? declaringType.FullName!;
 
             return fullName;
         }
 
         public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj, string[] keyParameters)
         {
-            if (obj is null)
-                yield break;
+            var json = JsonConvert.SerializeObject(obj);
 
-            Type type = obj.GetType();
-            // Directly return the value if it's a simple type or a specific case
-            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
-            {
-                if (keyParameters.Contains(key))
-                    yield return (key, obj);
-            }
-            else if (obj is IEnumerable)
-            {
-                var current = obj as IEnumerable<object>;
-                var index = 0;
-                foreach (var item in current!)
-                {
-                    foreach (var prop in GetIdProperties($"{key}[{index}]", item, keyParameters))
-                    {
-                        yield return prop;
-                    }
-                    index++;
-                }
-            }
-            else
-            {
-                // Iterate through all properties of the object
-                foreach (PropertyInfo propInfo in type.GetProperties())
-                {
-                    string propName = propInfo.Name;
-                    object propValue = propInfo.GetValue(obj, null)!;
+            var regex = new Regex(@"""(\w+)"":\s*(?:""([^""]*)""|(\d+))", RegexOptions.Compiled);
+            var matches = regex.Matches(json);
 
-                    foreach (var prop in GetIdProperties($"{key}.{propName}", propValue, keyParameters))
-                    {
-                        yield return prop;
-                    }
+            foreach (Match match in matches)
+            {
+                var outputKey = $"{key}.{match.Groups[1].Value}";
+                var value = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[3].Value;
+
+                if (keyParameters.Any(x => outputKey.EndsWith(x)))
+                {
+                    yield return (outputKey, value);
                 }
             }
         }
 
-        public static IEnumerable<(string Key, object Value)> GetAllowedParameters(string key, object obj, string[] bannedParameters)
+        public static (string Key, object? Value) RemoveBannedProperties(string key, object obj, string[] bannedParameters)
         {
-            if (obj is null)
-                yield break;
+            if (obj is null) return (key, default);
 
-            Type type = obj.GetType();
-            // Directly return the value if it's a simple type or a specific case
-            if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type.IsEnum)
+            var json = JsonConvert.SerializeObject(obj);
+
+            foreach (var bannedParam in bannedParameters)
             {
-                if (!bannedParameters.Contains(key))
-                {
-                    yield return (key, obj);
-                }
+                var regex = new Regex($@"""{bannedParam}"":\s*(?:""[^""]*""|\d+|null|true|false|\[[^\]]*\]|\{{[^\}}]*\}})\s*,?", RegexOptions.Compiled);
+                json = regex.Replace(json, string.Empty);
             }
-            else
-            {
-                var result = new Dictionary<string, object>();
 
-                if (obj is IEnumerable)
-                {
-                    var current = obj as IEnumerable;
-                    var index = 0;
-                    foreach (var item in current!)
-                    {
-                        foreach (var prop in GetAllowedParameters(item.GetType().Name, item, bannedParameters))
-                        {
-                            result.Add($"[{index}]", prop.Value);
-                        }
-                        index++;
-                    }
+            json = json.Trim().TrimEnd(',');
 
-                    yield return (key, ToDynamic(result));
-                }
-                else
-                {
-                    // Iterate through all properties of the object
-                    foreach (PropertyInfo propInfo in type.GetProperties())
-                    {
-                        string propName = propInfo.Name;
-                        object propValue = propInfo.GetValue(obj, null)!;
+            // Clean up any trailing commas
+            json = Regex.Replace(json, @",\s*}", "}");
+            json = Regex.Replace(json, @",\s*]", "]");
 
-                        foreach (var prop in GetAllowedParameters(propName, propValue, bannedParameters))
-                        {
-                            result.Add(propName, prop.Value);
-                        }
-                    }
-
-                    yield return (key, ToDynamic(result));
-                }
-            }
-        }
-
-        private static dynamic ToDynamic(Dictionary<string, object> props)
-        {
-            return props.Aggregate(new ExpandoObject() as IDictionary<string, Object>, (a, p) => { a.Add(p); return a; });
+            return (key, JsonConvert.DeserializeObject(json, obj.GetType()));
         }
     }
 }

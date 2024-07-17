@@ -30,7 +30,7 @@ namespace RauchTech.Logging.Services
         {
             if (MinimumLogLevel <= LogLevel.Debug)
             {
-                var args = context.ActionArguments.SelectMany(arg => Helper.GetAllowedParameters(arg.Key, arg.Value, BannedParameters)).ToArray();
+                var args = context.ActionArguments.Select(arg => Helper.RemoveBannedProperties(arg.Key, arg.Value, BannedParameters)).ToArray();
                 foreach (var arg in context.ActionArguments.SelectMany(arg => Helper.GetIdProperties(arg.Key, arg.Value, KeyParameters)).Distinct())
                 {
                     AddKey($"param.{arg.Key}", arg.Value);

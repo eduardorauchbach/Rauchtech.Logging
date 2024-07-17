@@ -41,7 +41,7 @@ namespace RauchTech.Logging.Api
 
         private void LogEntry(ActionExecutingContext context)
         {
-            _log.RegisterContextParameters(context, _sourceContext, _actionName);
+            _log.RegisterContextParameters(context, _sourceContext!, _actionName!);
             _log.Log(LogLevel.Information, sourceContext: _sourceContext, memberName: _actionName, message: CustomLogDefaultMessages.Begin);
         }
 
