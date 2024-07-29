@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -96,9 +97,81 @@ namespace RauchTech.Logging.Services
             return fullName;
         }
 
+        public class FormFileMetadata : IFormFile
+        {
+            public string? FileName { get; set; }
+            public string? ContentType { get; set; }
+            public long Length { get; set; }
+
+            public string ContentDisposition => null;
+            public IHeaderDictionary Headers => null;
+            public string Name => null;
+
+            public void CopyTo(Stream target)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task CopyToAsync(Stream target, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Stream OpenReadStream()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public static object ConvertFormFile(object obj)
+        {
+            if (obj == null) return null;
+
+            if (obj is IFormFile formFile)
+            {
+                return new FormFileMetadata
+                {
+                    FileName = formFile.FileName,
+                    ContentType = formFile.ContentType,
+                    Length = formFile.Length
+                };
+            }
+            else
+            {
+                var objType = obj.GetType();
+                if (!objType.IsClass) return obj;
+
+                var newObj = Activator.CreateInstance(objType);
+
+                foreach (var property in objType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    var value = property.GetValue(obj);
+
+                    if (value is IFormFile formFileProp)
+                    {
+                        var metadata = new FormFileMetadata
+                        {
+                            FileName = formFileProp.FileName,
+                            ContentType = formFileProp.ContentType,
+                            Length = formFileProp.Length
+                        };
+
+                        property.SetValue(newObj, metadata);
+                    }
+                    else
+                    {
+                        property.SetValue(newObj, value);
+                    }
+                }
+
+                return newObj;
+            }
+        }
+
         public static IEnumerable<(string Key, object Value)> GetIdProperties(string key, object obj, string[] keyParameters)
         {
-            var json = JsonConvert.SerializeObject(obj);
+            var processedObj = ConvertFormFile(obj);
+            var json = JsonConvert.SerializeObject(processedObj);
 
             var regex = new Regex(@"""(\w+)"":\s*(?:""([^""]*)""|(\d+))", RegexOptions.Compiled);
             var matches = regex.Matches(json);
@@ -119,7 +192,8 @@ namespace RauchTech.Logging.Services
         {
             if (obj is null) return (key, default);
 
-            var json = JsonConvert.SerializeObject(obj);
+            var processedObj = ConvertFormFile(obj);
+            var json = JsonConvert.SerializeObject(processedObj);
 
             foreach (var bannedParam in bannedParameters)
             {
